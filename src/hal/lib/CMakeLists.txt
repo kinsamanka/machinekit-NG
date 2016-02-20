@@ -18,8 +18,7 @@ set(HALLIBSRCS
 
 foreach(_flav ${BUILD_THREAD_FLAVORS})
     _flavor_helper(${_flav})
-    add_library(hal_lib_${_fname} SHARED ${HALLIBSRCS} 
-        $<TARGET_OBJECTS:rtapi_heap>)
+    add_library(hal_lib_${_fname} SHARED ${HALLIBSRCS})
     set_target_properties(hal_lib_${_fname} PROPERTIES 
         COMPILE_DEFINITIONS "RTAPI;THREAD_FLAVOR_ID=${RTAPI_${_FLAV}_ID}"
         COMPILE_FLAGS "${${_FLAV}_THREADS_RTFLAGS} -UULAPI"

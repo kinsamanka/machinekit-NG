@@ -42,8 +42,8 @@ target_link_libraries(flavor mkini mkshm)
 _install(flavor)
 
 set(RTAPI_SRC ${XXAPI_COMMON_SRCS} 
-    rtapi_main.c rtapi_support.c rtapi_hexdump.c rtapi_compat.c
-    $<TARGET_OBJECTS:rtapi_heap> $<TARGET_OBJECTS:nanopb>)
+    rtapi_heap.c rtapi_main.c rtapi_support.c rtapi_hexdump.c rtapi_compat.c
+    $<TARGET_OBJECTS:nanopb>)
 
 add_library(mkulapi SHARED $<TARGET_OBJECTS:ulapi_autoload>
     $<TARGET_OBJECTS:rtapi_compat> $<TARGET_OBJECTS:rtapi_support>)
@@ -88,18 +88,22 @@ foreach(_flav ${BUILD_THREAD_FLAVORS})
     if(WITH_USERMODE_PCI)
         target_link_libraries(rtapi_${_fname} ${UDEV_LIBRARIES})
     endif()
-    
-    add_executable(rtapi_app_${_fname} $<TARGET_OBJECTS:rtapi_app>
-        $<TARGET_OBJECTS:rtapi_compat> $<TARGET_OBJECTS:rtapi_support>)
+
+    add_library(_rtapi_app_${_fname}_ OBJECT rtapi_app.cc rtapi_compat.c
+        rtapi_support.c rtapi_hexdump.c)
+
+    set_target_properties(_rtapi_app_${_fname}_ PROPERTIES
+        COMPILE_DEFINITIONS "THREAD_FLAVOR_ID=${RTAPI_${_FLAV}_ID}"
+        COMPILE_FLAGS "${${_FLAV}_THREADS_RTFLAGS}")
+
+    add_executable(rtapi_app_${_fname} $<TARGET_OBJECTS:_rtapi_app_${_fname}_>)
     set_target_properties(rtapi_app_${_fname} PROPERTIES
         BUILD_WITH_INSTALL_RPATH FALSE
         INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/machinekit/${_fname};${_rpath}"
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        COMPILE_DEFINITIONS RTAPI
-        COMPILE_FLAGS -UULAPI
         LINK_FLAGS "${${_FLAV}_THREADS_LDFLAGS}"
         RUNTIME_OUTPUT_DIRECTORY ${PROJECT_LIBEXEC_DIR})
-    target_link_libraries(rtapi_app_${_fname} mk_rip mk_rip.${_fname} mkini 
+    target_link_libraries(rtapi_app_${_fname} mk_rip.${_fname} mkini 
         mkshm mtalk rtapi_math mk-pb2++ ${CMAKE_DL_LIBS})
     cleanup_rpath_hack(rtapi_app_${_fname})
 
