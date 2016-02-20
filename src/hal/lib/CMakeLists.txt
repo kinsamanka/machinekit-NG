@@ -18,11 +18,10 @@ set(HALLIBSRCS
 
 foreach(_flav ${BUILD_THREAD_FLAVORS})
     _flavor_helper(${_flav})
-    add_library(hal_lib_${_fname} SHARED ${HALLIBSRCS} 
-        $<TARGET_OBJECTS:rtapi_heap>)
+    add_library(hal_lib_${_fname} SHARED ${HALLIBSRCS})
     set_target_properties(hal_lib_${_fname} PROPERTIES 
         COMPILE_DEFINITIONS "RTAPI;THREAD_FLAVOR_ID=${RTAPI_${_FLAV}_ID}"
-        COMPILE_FLAGS "${${_FLAV}_THREADS_RTFLAGS} -UULAPI"
+        COMPILE_FLAGS "${${_FLAV}_THREADS_RTFLAGS}"
         LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBEXEC_DIR}/${_fname}
         OUTPUT_NAME "hal_lib"
         PREFIX "")
@@ -34,7 +33,9 @@ add_library(mkhal SHARED ${HALLIBSRCS} hal_iter.c halpb.cc
     $<TARGET_OBJECTS:ulapi_autoload> $<TARGET_OBJECTS:rtapi_compat>
     $<TARGET_OBJECTS:rtapi_support> $<TARGET_OBJECTS:rtapi_heap>)
 target_link_libraries(mkhal mk-pb2++ ${CMAKE_DL_LIBS} rt)
-set_target_properties(mkhal PROPERTIES VERSION ${GENERIC_LIB_VERSION})
+set_target_properties(mkhal PROPERTIES
+    COMPILE_DEFINITIONS "ULAPI"
+    VERSION ${GENERIC_LIB_VERSION})
 _install(mkhal)
 
 set(halpy_dir ${PROJECT_PYTHON_DIR}/hal)
@@ -52,6 +53,7 @@ set_target_properties(_hal PROPERTIES
     BUILD_WITH_INSTALL_RPATH FALSE
     INSTALL_RPATH "${_rpath}"
     INSTALL_RPATH_USE_LINK_PATH TRUE
+    COMPILE_DEFINITIONS "ULAPI"
     LIBRARY_OUTPUT_DIRECTORY ${halpy_dir}
     PREFIX "")
 target_link_libraries(_hal mk_rip mkhal ${PYTHON_LIBRARIES})
