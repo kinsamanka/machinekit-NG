@@ -1,0 +1,9 @@
+#!/bin/bash
+
+b=$(for a in $(tr " " "\n" < $1 | grep '.*\.c\.o$'); do 
+        readelf -Ws $a 
+    done | grep rtapi_exported_ | cut -f3- -d_ | sort -u)
+
+echo '{ global :' > $2
+for a in $b; do echo $a\; ; done >> $2
+echo 'local : * ; };' >> $2

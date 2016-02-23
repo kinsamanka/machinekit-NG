@@ -91,17 +91,25 @@ foreach(_flav ${BUILD_THREAD_FLAVORS})
     target_link_libraries(ulapi-${_fname} mkshm mkhal)
     _install_exec(ulapi-${_fname})
 
+    set(vscript "-Wl,--version-script,rtapi_${_fname}.vers")
     add_library(rtapi_${_fname} SHARED ${RTAPI_SRC} ${${_FLAV}_THREADS_SOURCE})
     set_target_properties(rtapi_${_fname} PROPERTIES 
         COMPILE_DEFINITIONS "RTAPI;THREAD_FLAVOR_ID=${RTAPI_${_FLAV}_ID}"
         COMPILE_FLAGS "${${_FLAV}_THREADS_RTFLAGS} ${cflags}"
         LIBRARY_OUTPUT_DIRECTORY ${PROJECT_LIBEXEC_DIR}/${_fname}
-        LINK_FLAGS "${${_FLAV}_THREADS_LDFLAGS} -Wl,--no-as-needed"
+        LINK_FLAGS "${${_FLAV}_THREADS_LDFLAGS} ${vscript} -Bsymbolic"
         OUTPUT_NAME "rtapi"
         PREFIX "")
     if(WITH_USERMODE_PCI)
         target_link_libraries(rtapi_${_fname} ${UDEV_LIBRARIES})
     endif()
+    add_custom_command(TARGET rtapi_${_fname}
+        PRE_LINK
+        COMMAND pwd
+        COMMAND ${CMAKE_SOURCE_DIR}/scripts/get_symbols 
+            CMakeFiles/rtapi_${_fname}.dir/link.txt
+            rtapi_${_fname}.vers
+        COMMENT " Running PRELINK action ")
     _install_exec(rtapi_${_fname} ${_fname})
 
     add_executable(rtapi_app_${_fname} rtapi_app.cc rtapi_compat.c
