@@ -1,3 +1,5 @@
+add_definitions(-DULAPI)
+
 add_library(shmdrvapi OBJECT shmdrvapi.c)
 
 add_library(mkshm SHARED $<TARGET_OBJECTS:shmdrvapi>)

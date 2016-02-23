@@ -1,3 +1,5 @@
+add_definitions(-DULAPI)
+
 include_directories(${PYTHON_INCLUDE_DIRS})
 
 set(CY_SRC hal rtapi compat shmcommon)

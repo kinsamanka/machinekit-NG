@@ -11,6 +11,7 @@ add_executable(halcmd ${HALCMD_SRCS})
 target_link_libraries(halcmd mk_rip mkini mkhal mk-pb2++ mtalk rtapi_math readline)
 set_target_properties(halcmd PROPERTIES
     BUILD_WITH_INSTALL_RPATH FALSE
+    COMPILE_DEFINITIONS "ULAPI"
     INSTALL_RPATH "${_rpath}"
     INSTALL_RPATH_USE_LINK_PATH TRUE)
 cleanup_rpath_hack(halcmd)
@@ -34,6 +35,7 @@ foreach(util comp instcomp)
 endforeach()
 
 add_executable(halmeter meter.c miscgtk.c)
+set_target_properties(halmeter PROPERTIES COMPILE_DEFINITIONS "ULAPI")
 set_property(TARGET halmeter APPEND PROPERTY 
     INCLUDE_DIRECTORIES "${GTK2_INCLUDE_DIRS}")
 target_link_libraries(halmeter mkhal ${GTK2_LIBRARIES})
@@ -49,6 +51,7 @@ set(HALSCOPE_SRCS
     miscgtk.c)
 
 add_executable(halscope ${HALSCOPE_SRCS})
+set_target_properties(halscope PROPERTIES COMPILE_DEFINITIONS "ULAPI")
 set_property(TARGET halscope APPEND PROPERTY
     INCLUDE_DIRECTORIES "${GTK2_INCLUDE_DIRS}")
 target_link_libraries(halscope mkhal rtapi_math ${GTK2_LIBRARIES})
