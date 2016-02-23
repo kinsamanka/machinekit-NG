@@ -1,28 +1,22 @@
 include_directories(${PYTHON_INCLUDE_DIRS})
 
-set(CY_SRC hal rtapi compat shmcommon)
-
-set(deps halfile.py launcher.py service.py nosetests)
-set(stamp ${CMAKE_CURRENT_BINARY_DIR}/timestamp)
-add_custom_command(OUTPUT ${stamp}
-    COMMAND ${CMAKE_COMMAND} -E touch ${stamp}
-    COMMAND cp -a ${deps} ${PROJECT_PYTHON_DIR}/machinekit/
-    DEPENDS ${deps}
+set(dep halfile.py launcher.py service.py nosetests)
+add_custom_target(py_deps
+    COMMAND ${CMAKE_COMMAND}
+        -E touch ${PROJECT_PYTHON_DIR}/machinekit/__init__.py
+    COMMAND cp -af ${dep} ${PROJECT_PYTHON_DIR}/machinekit
+    DEPENDS ${dep}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(init ${PROJECT_PYTHON_DIR}/machinekit/__init__.py)
-add_custom_command(OUTPUT ${init}
-    COMMAND ${CMAKE_COMMAND} -E touch ${init})
-
-set(PWD ${CMAKE_CURRENT_BINARY_DIR})
-foreach(file ${CY_SRC})
+foreach(file hal rtapi compat shmcommon)
     add_custom_command(
-        OUTPUT  ${PWD}/${file}.c
-        COMMAND ${CYTHON} -o ${PWD}/${file}.c ${file}.pyx
-        DEPENDS ${file}.pyx ${file}.pxd ${init} ${stamp}
+        OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/${file}.c
+        COMMAND ${CYTHON} -o ${CMAKE_CURRENT_BINARY_DIR}/${file}.c ${file}.pyx
+        DEPENDS ${file}.pyx ${file}.pxd
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generate C files from ${file}.pyx")
-    add_library(${file}_obj OBJECT ${PWD}/${file}.c)
+    add_library(${file}_obj OBJECT ${CMAKE_CURRENT_BINARY_DIR}/${file}.c)
+    add_dependencies(${file}_obj py_deps)
 endforeach()
 
 configure_file("config.py.in" "${PROJECT_PYTHON_DIR}/machinekit/config.py" @ONLY)

@@ -97,6 +97,7 @@ foreach(_flav ${BUILD_THREAD_FLAVORS})
     add_dependencies(pbring.${_fname} npb_gen_files)
     add_dependencies(pbmsgs.${_fname} npb_gen_files)
     add_dependencies(ringload.${_fname} npb_gen_files)
+    add_dependencies(hal_lib_${_fname} pb_gen_files)
 endforeach()
 
 # create needed directories
