@@ -112,3 +112,5 @@ add_library(mk-npb SHARED $<TARGET_OBJECTS:nanopb> $<TARGET_OBJECTS:npb-obj>
 set_target_properties(mk-npb PROPERTIES COMPILE_DEFINITIONS "${NPB_DEFINITIONS}")
 set_target_properties(mk-npb PROPERTIES VERSION ${GENERIC_LIB_VERSION})
 _install(mk-npb)
+
+add_dependencies(mk-pb2++ mk-npb)

@@ -4,11 +4,19 @@ include_directories(${PYTHON_INCLUDE_DIRS})
 
 set(CY_SRC hal rtapi compat shmcommon)
 
-set(deps halfile.py launcher.py service.py nosetests)
+unset(deps)
+foreach(dep halfile.py launcher.py service.py nosetests)
+    set(tgt ${PROJECT_PYTHON_DIR}/machinekit/${dep})
+    add_custom_command(OUTPUT ${tgt}
+        COMMAND cp -a ${dep} ${tgt}
+        DEPENDS ${dep}
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    set(deps ${deps} ${tgt})
+endforeach()
+
 set(stamp ${CMAKE_CURRENT_BINARY_DIR}/timestamp)
 add_custom_command(OUTPUT ${stamp}
     COMMAND ${CMAKE_COMMAND} -E touch ${stamp}
-    COMMAND cp -a ${deps} ${PROJECT_PYTHON_DIR}/machinekit/
     DEPENDS ${deps}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
